@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendline - Project Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Trendline</h1>
+        <p class="subtitle">Simple Project Progress Tracker</p>
+        
+        <div id="setupView" class="view">
+            <h2>Project Setup</h2>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="projectId">Project ID (for accessing later):</label>
+                    <input type="text" id="projectId" required placeholder="e.g., my-project-2025">
+                </div>
+                
+                <div class="form-group">
+                    <label for="totalTasks">Total Number of Tasks:</label>
+                    <input type="number" id="totalTasks" required min="1" placeholder="e.g., 100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Create Project</button>
+                <button type="button" class="btn btn-secondary" onclick="showLoadView()">Load Existing Project</button>
+            </form>
+        </div>
+        
+        <div id="loadView" class="view hidden">
+            <h2>Load Project</h2>
+            <form id="loadForm">
+                <div class="form-group">
+                    <label for="loadProjectId">Project ID:</label>
+                    <input type="text" id="loadProjectId" required placeholder="Enter your project ID">
+                </div>
+                <button type="submit" class="btn btn-primary">Load Project</button>
+                <button type="button" class="btn btn-secondary" onclick="showSetupView()">Back</button>
+            </form>
+        </div>
+        
+        <div id="trackerView" class="view hidden">
+            <div class="header-bar">
+                <h2 id="projectTitle"></h2>
+                <button class="btn btn-secondary" onclick="showSetupView()">New Project</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Tasks</div>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completed</div>
+                    <div class="stat-value" id="statCompleted">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Remaining</div>
+                    <div class="stat-value" id="statRemaining">0</div>
+                </div>
+                <div class="stat-card" id="statusCard">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value" id="statStatus">On Track</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="burndownChart"></canvas>
+            </div>
+            
+            <div class="daily-progress">
+                <h3>Daily Progress</h3>
+                <form id="progressForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="progressDate">Date:</label>
+                            <input type="date" id="progressDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasksCompleted">Tasks Completed on This Day:</label>
+                            <input type="number" id="tasksCompleted" required min="0" placeholder="0">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+                
+                <div class="progress-list">
+                    <h4>Progress History</h4>
+                    <div id="progressHistory"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="message" class="message hidden"></div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

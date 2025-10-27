@@ -1,0 +1,22 @@
+{
+  "name": "trendline",
+  "version": "1.0.0",
+  "description": "Simple burndown chart project tracker with Cloudflare KV storage",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler pages dev public --kv=TRENDLINE_KV",
+    "deploy": "wrangler pages deploy public",
+    "create-kv": "wrangler kv:namespace create TRENDLINE_KV"
+  },
+  "keywords": [
+    "burndown",
+    "chart",
+    "project",
+    "tracker"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

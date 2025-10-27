@@ -1,0 +1,8 @@
+name = "trendline"
+compatibility_date = "2024-01-01"
+
+pages_build_output_dir = "public"
+
+[[kv_namespaces]]
+binding = "TRENDLINE_KV"
+id = "358b72ad23974c75bd072b82dd14f619"
