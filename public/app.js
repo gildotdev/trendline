@@ -170,7 +170,8 @@ async function loadProjectById(projectId) {
     );
 
     if (!response.ok) {
-      throw new Error("Project not found");
+      const errorText = await response.text();
+      throw new Error(`Project not found: ${errorText}`);
     }
 
     const projectData = await response.json();
@@ -184,10 +185,20 @@ async function loadProjectById(projectId) {
       window.history.pushState({ projectId }, "", newUrl);
     }
   } catch (error) {
-    showMessage("Error loading project: " + error.message, "error");
-    // If loading from URL failed, redirect to home
+    console.error("Error loading project:", error);
+    showMessage(
+      "Project '" + projectId + "' not found. Please create it first.",
+      "error"
+    );
+    // If loading from URL failed, show setup view
     if (window.location.pathname.startsWith("/p/")) {
-      window.history.pushState({}, "", "/");
+      // Pre-fill the project ID if user wants to create it
+      setTimeout(() => {
+        window.history.replaceState({}, "", "/");
+        showSetupView();
+        // Pre-fill the project ID field
+        document.getElementById("projectId").value = projectId;
+      }, 2000);
     }
   }
 }

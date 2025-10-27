@@ -1,7 +1,11 @@
 {
   "version": 1,
   "include": [
-    "/api/*"
+    "/*"
   ],
-  "exclude": []
+  "exclude": [
+    "/app.js",
+    "/style.css",
+    "/index.html"
+  ]
 }
