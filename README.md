@@ -1,3 +1,4 @@
+# Trendline - Burndown Chart App
 # 📊 Trendline - Simple Project Tracker
 
 A clean, simple burndown chart web application for tracking project progress over time. Perfect for students, freelancers, or anyone who needs to track whether they're on schedule to complete a project by a deadline.
