@@ -97,7 +97,53 @@ A clean, simple burndown chart web application for tracking project progress ove
      - KV namespace: Select the namespace you created
    - Save and redeploy
 
-### Option 2: GitHub Integration
+### Option 2: GitHub Actions (Automated Deployment)
+
+This repository includes a GitHub Action that automatically deploys to Cloudflare Pages when you push to the `main` branch.
+
+1. **Get your Cloudflare API Token**
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
+   - Click on your profile → API Tokens
+   - Click "Create Token"
+   - Use "Edit Cloudflare Workers" template or create custom token with:
+     - Account → Cloudflare Pages: Edit
+     - Account → Workers KV Storage: Edit
+   - Copy the generated token
+
+2. **Get your Cloudflare Account ID**
+   - In Cloudflare Dashboard, click on any domain
+   - Scroll down in the right sidebar to find "Account ID"
+   - Copy the Account ID
+
+3. **Add GitHub Secrets**
+   - Go to your GitHub repository
+   - Click Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Add two secrets:
+     - Name: `CLOUDFLARE_API_TOKEN`, Value: (your API token from step 1)
+     - Name: `CLOUDFLARE_ACCOUNT_ID`, Value: (your Account ID from step 2)
+
+4. **Push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
+
+5. **Verify deployment**
+   - Go to the "Actions" tab in your GitHub repository
+   - Watch the deployment workflow run
+   - Once complete, your app will be live at `https://trendline.pages.dev`
+
+6. **Configure KV binding in Cloudflare Dashboard**
+   - Go to Workers & Pages → trendline project
+   - Settings → Functions → KV namespace bindings
+   - Add binding:
+     - Variable name: `TRENDLINE_KV`
+     - KV namespace: Select your KV namespace
+   - Save
+
+### Option 3: Manual GitHub Integration
 
 1. **Push code to GitHub**
 
@@ -109,7 +155,7 @@ A clean, simple burndown chart web application for tracking project progress ove
      - Build output directory: `public`
      - Build command: (leave empty)
 
-3. **Configure KV binding** (same as Option 1, step 3)
+3. **Configure KV binding** (same as Option 2, step 6)
 
 ## Usage Guide
 
