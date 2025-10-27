@@ -1,5 +1,6 @@
 let currentProject = null;
 let burndownChart = null;
+let resizeTimeout = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,6 +10,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set today's date as default for progress form
     document.getElementById('progressDate').valueAsDate = new Date();
+    
+    // Handle window resize for responsive chart updates
+    window.addEventListener('resize', () => {
+        if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+        }
+        resizeTimeout = setTimeout(() => {
+            if (currentProject && burndownChart) {
+                updateChart(currentProject);
+            }
+        }, 250);
+    });
 });
 
 // View management
@@ -249,30 +262,39 @@ function renderChart(project) {
             labels: dates,
             datasets: [
                 {
-                    label: 'Ideal Progress',
+                    label: 'Ideal',
                     data: idealData,
-                    borderColor: '#6b7280',
-                    backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                    borderColor: '#9ca3af',
+                    backgroundColor: 'rgba(156, 163, 175, 0.1)',
                     borderWidth: 2,
-                    borderDash: [5, 5],
+                    borderDash: [8, 4],
                     pointRadius: 0,
                     tension: 0
                 },
                 {
-                    label: 'Actual Progress',
+                    label: 'Actual',
                     data: actualData,
                     borderColor: '#4f46e5',
                     backgroundColor: 'rgba(79, 70, 229, 0.1)',
                     borderWidth: 3,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     tension: 0.1
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
+            aspectRatio: window.innerWidth < 768 ? 1.2 : 2,
+            layout: {
+                padding: {
+                    top: 20,
+                    right: 20,
+                    bottom: 10,
+                    left: 10
+                }
+            },
             interaction: {
                 intersect: false,
                 mode: 'index'
@@ -280,20 +302,49 @@ function renderChart(project) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: window.innerWidth < 768 ? 'bottom' : 'top',
+                    labels: {
+                        padding: window.innerWidth < 768 ? 15 : 20,
+                        font: {
+                            size: window.innerWidth < 768 ? 13 : 14,
+                            weight: '500'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'line',
+                        boxWidth: 30,
+                        boxHeight: 3
+                    }
                 },
                 title: {
                     display: true,
                     text: 'Burndown Chart',
                     font: {
-                        size: 16,
+                        size: window.innerWidth < 768 ? 16 : 18,
                         weight: 'bold'
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: window.innerWidth < 768 ? 15 : 25
                     }
                 },
                 tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': ' + Math.round(context.parsed.y) + ' tasks remaining';
+                            const label = context.dataset.label || '';
+                            const value = Math.round(context.parsed.y);
+                            return label + ': ' + value + ' tasks remaining';
                         }
                     }
                 }
@@ -303,16 +354,51 @@ function renderChart(project) {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Tasks Remaining'
+                        text: 'Tasks Remaining',
+                        font: {
+                            size: window.innerWidth < 768 ? 12 : 13,
+                            weight: '600'
+                        },
+                        padding: {
+                            bottom: 10
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 12
+                        },
+                        padding: 8,
+                        precision: 0
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     }
                 },
                 x: {
                     title: {
-                        display: true,
-                        text: 'Date'
+                        display: window.innerWidth >= 768,
+                        text: 'Date',
+                        font: {
+                            size: 13,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10
+                        }
                     },
                     ticks: {
-                        maxTicksLimit: 10
+                        maxRotation: window.innerWidth < 768 ? 60 : 45,
+                        minRotation: window.innerWidth < 768 ? 60 : 45,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 11
+                        },
+                        autoSkip: true,
+                        maxTicksLimit: window.innerWidth < 768 ? 6 : 12,
+                        padding: 5
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        display: true
                     }
                 }
             }
