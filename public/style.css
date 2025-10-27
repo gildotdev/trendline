@@ -154,6 +154,15 @@ h4 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-bar > div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .stats-grid {

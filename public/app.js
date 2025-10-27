@@ -4,32 +4,63 @@ let resizeTimeout = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('projectForm').addEventListener('submit', handleCreateProject);
-    document.getElementById('loadForm').addEventListener('submit', handleLoadProject);
-    document.getElementById('progressForm').addEventListener('submit', handleUpdateProgress);
-    
-    // Set today's date as default for progress form
-    document.getElementById('progressDate').valueAsDate = new Date();
-    
-    // Handle window resize for responsive chart updates
-    window.addEventListener('resize', () => {
-        if (resizeTimeout) {
-            clearTimeout(resizeTimeout);
-        }
-        resizeTimeout = setTimeout(() => {
-            if (currentProject && burndownChart) {
-                updateChart(currentProject);
-            }
-        }, 250);
-    });
+  document
+    .getElementById("projectForm")
+    .addEventListener("submit", handleCreateProject);
+  document
+    .getElementById("loadForm")
+    .addEventListener("submit", handleLoadProject);
+  document
+    .getElementById("progressForm")
+    .addEventListener("submit", handleUpdateProgress);
+
+  // Set today's date as default for progress form
+  document.getElementById("progressDate").valueAsDate = new Date();
+
+  // Handle window resize for responsive chart updates
+  window.addEventListener("resize", () => {
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout);
+    }
+    resizeTimeout = setTimeout(() => {
+      if (currentProject && burndownChart) {
+        updateChart(currentProject);
+      }
+    }, 250);
+  });
+
+  // Check if URL contains a project path (e.g., /p/projectname)
+  const path = window.location.pathname;
+  const projectMatch = path.match(/^\/p\/([^\/]+)/);
+  if (projectMatch) {
+    const projectId = decodeURIComponent(projectMatch[1]);
+    loadProjectById(projectId);
+  }
+
+  // Handle browser back/forward buttons
+  window.addEventListener("popstate", (event) => {
+    const path = window.location.pathname;
+    const projectMatch = path.match(/^\/p\/([^\/]+)/);
+
+    if (projectMatch) {
+      const projectId = decodeURIComponent(projectMatch[1]);
+      loadProjectById(projectId);
+    } else {
+      // Back to home page
+      showSetupView();
+    }
+  });
 });
 
 // View management
 function showSetupView() {
-    document.getElementById('setupView').classList.remove('hidden');
-    document.getElementById('loadView').classList.add('hidden');
-    document.getElementById('trackerView').classList.add('hidden');
-    currentProject = null;
+  document.getElementById("setupView").classList.remove("hidden");
+  document.getElementById("loadView").classList.add("hidden");
+  document.getElementById("trackerView").classList.add("hidden");
+  currentProject = null;
+
+  // Update URL to home
+  window.history.pushState({}, "", "/");
 }
 
 function showLoadView() {
@@ -42,6 +73,32 @@ function showTrackerView() {
     document.getElementById('setupView').classList.add('hidden');
     document.getElementById('loadView').classList.add('hidden');
     document.getElementById('trackerView').classList.remove('hidden');
+}
+
+// Copy share link to clipboard
+function copyShareLink() {
+    if (!currentProject) return;
+    
+    const shareUrl = `${window.location.origin}/p/${encodeURIComponent(currentProject.projectId)}`;
+    
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        showMessage('Link copied to clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showMessage('Link copied to clipboard!', 'success');
+        } catch (err) {
+            showMessage('Failed to copy link', 'error');
+        }
+        document.body.removeChild(textArea);
+    });
 }
 
 // Message display
@@ -79,44 +136,68 @@ async function handleCreateProject(e) {
     };
     
     try {
-        const response = await fetch('/api/project', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(projectData)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to create project');
-        }
-        
-        currentProject = projectData;
-        showMessage('Project created successfully!', 'success');
-        loadProject(currentProject);
+      const response = await fetch("/api/project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(projectData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create project");
+      }
+
+      currentProject = projectData;
+      showMessage("Project created successfully!", "success");
+      loadProject(currentProject);
+
+      // Update URL without page reload
+      window.history.pushState(
+        { projectId },
+        "",
+        `/p/${encodeURIComponent(projectId)}`
+      );
     } catch (error) {
         showMessage('Error creating project: ' + error.message, 'error');
     }
 }
 
 // Load project
-async function handleLoadProject(e) {
-    e.preventDefault();
-    
-    const projectId = document.getElementById('loadProjectId').value.trim();
-    
-    try {
-        const response = await fetch(`/api/project?id=${encodeURIComponent(projectId)}`);
-        
-        if (!response.ok) {
-            throw new Error('Project not found');
-        }
-        
-        const projectData = await response.json();
-        currentProject = projectData;
-        showMessage('Project loaded successfully!', 'success');
-        loadProject(currentProject);
-    } catch (error) {
-        showMessage('Error loading project: ' + error.message, 'error');
+// Load project by ID (reusable function)
+async function loadProjectById(projectId) {
+  try {
+    const response = await fetch(
+      `/api/project?id=${encodeURIComponent(projectId)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Project not found");
     }
+
+    const projectData = await response.json();
+    currentProject = projectData;
+    showMessage("Project loaded successfully!", "success");
+    loadProject(currentProject);
+
+    // Update URL without page reload
+    const newUrl = `/p/${encodeURIComponent(projectId)}`;
+    if (window.location.pathname !== newUrl) {
+      window.history.pushState({ projectId }, "", newUrl);
+    }
+  } catch (error) {
+    showMessage("Error loading project: " + error.message, "error");
+    // If loading from URL failed, redirect to home
+    if (window.location.pathname.startsWith("/p/")) {
+      window.history.pushState({}, "", "/");
+    }
+  }
+}
+
+// Load project
+async function handleLoadProject(e) {
+  e.preventDefault();
+
+  const projectId = document.getElementById("loadProjectId").value.trim();
+  await loadProjectById(projectId);
 }
 
 // Update daily progress

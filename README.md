@@ -168,9 +168,32 @@ This repository includes a GitHub Action that automatically deploys to Cloudflar
    - **Start Date**: When you started (or will start)
    - **End Date**: Your deadline
 3. Click "Create Project"
+4. The URL will automatically update to `/p/your-project-id`
+
+### Direct Access via URL
+
+You can access any project directly by navigating to:
+```
+https://your-domain.pages.dev/p/project-id
+```
+
+For example:
+- `https://trendline.pages.dev/p/Cards` loads the "Cards" project
+- `http://localhost:8788/p/homework-2025` loads the "homework-2025" project
+
+**Bookmarking**: Simply bookmark the project URL to quickly access it later from any device!
+
+### Sharing Your Project
+
+1. When viewing a project, click the "📋 Copy Link" button
+2. Share the copied URL with others
+3. Anyone with the link can view and update the project
 
 ### Loading an Existing Project
 
+**Option 1 - Direct URL**: Navigate to `/p/your-project-id`
+
+**Option 2 - Load Form**:
 1. Click "Load Existing Project"
 2. Enter your Project ID
 3. Click "Load Project"
