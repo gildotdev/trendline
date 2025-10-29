@@ -92,6 +92,9 @@ export async function onRequestPut(context) {
         if (updateData.projectName !== undefined) {
             projectData.projectName = updateData.projectName;
         }
+        if (updateData.totalTasks !== undefined) {
+            projectData.totalTasks = updateData.totalTasks;
+        }
         if (updateData.startDate !== undefined) {
             projectData.startDate = updateData.startDate;
         }

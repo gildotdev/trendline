@@ -546,6 +546,7 @@ function showEditProjectModal() {
     if (!currentProject) return;
     
     document.getElementById('editProjectName').value = currentProject.projectName || currentProject.projectId;
+    document.getElementById('editTotalTasks').value = currentProject.totalTasks;
     document.getElementById('editStartDate').value = currentProject.startDate;
     document.getElementById('editEndDate').value = currentProject.endDate;
     
@@ -577,11 +578,17 @@ async function handleEditProject(e) {
     if (!currentProject) return;
     
     const projectName = document.getElementById('editProjectName').value.trim();
+    const totalTasks = parseInt(document.getElementById('editTotalTasks').value);
     const startDate = document.getElementById('editStartDate').value;
     const endDate = document.getElementById('editEndDate').value;
     
     if (new Date(startDate) >= new Date(endDate)) {
         showMessage('End date must be after start date', 'error');
+        return;
+    }
+    
+    if (totalTasks < 1) {
+        showMessage('Total tasks must be at least 1', 'error');
         return;
     }
     
@@ -595,6 +602,14 @@ async function handleEditProject(e) {
         }
     }
     
+    // Validate that total completed tasks don't exceed new total
+    const totalCompleted = Object.values(currentProject.dailyProgress || {}).reduce((sum, val) => sum + val, 0);
+    if (totalCompleted > totalTasks) {
+        if (!confirm(`You have already completed ${totalCompleted} tasks, which exceeds the new total of ${totalTasks}. This may affect chart accuracy. Continue?`)) {
+            return;
+        }
+    }
+    
     try {
         const response = await fetch('/api/project', {
             method: 'PUT',
@@ -602,6 +617,7 @@ async function handleEditProject(e) {
             body: JSON.stringify({
                 projectId: currentProject.projectId,
                 projectName,
+                totalTasks,
                 startDate,
                 endDate
             })
@@ -613,6 +629,7 @@ async function handleEditProject(e) {
         
         // Update local data
         currentProject.projectName = projectName;
+        currentProject.totalTasks = totalTasks;
         currentProject.startDate = startDate;
         currentProject.endDate = endDate;
         
