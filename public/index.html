@@ -20,6 +20,11 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="projectName">Project Name:</label>
+                    <input type="text" id="projectName" required placeholder="e.g., My Awesome Project">
+                </div>
+                
+                <div class="form-group">
                     <label for="totalTasks">Total Number of Tasks:</label>
                     <input type="number" id="totalTasks" required min="1" placeholder="e.g., 100">
                 </div>
@@ -56,6 +61,7 @@
                 <div>
                     <h2 id="projectTitle"></h2>
                     <button class="btn btn-secondary" onclick="copyShareLink()" style="font-size: 0.875rem; padding: 8px 16px;">📋 Copy Link</button>
+                    <button class="btn btn-secondary" onclick="showEditProjectModal()" style="font-size: 0.875rem; padding: 8px 16px;">✏️ Edit Info</button>
                 </div>
                 <button class="btn btn-secondary" onclick="showSetupView()">New Project</button>
             </div>
@@ -103,6 +109,37 @@
                     <h4>Progress History</h4>
                     <div id="progressHistory"></div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Edit Project Modal -->
+        <div id="editProjectModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Project Information</h3>
+                    <button class="modal-close" onclick="closeEditProjectModal()">&times;</button>
+                </div>
+                <form id="editProjectForm">
+                    <div class="form-group">
+                        <label for="editProjectName">Project Name:</label>
+                        <input type="text" id="editProjectName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editStartDate">Start Date:</label>
+                        <input type="date" id="editStartDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editEndDate">End Date:</label>
+                        <input type="date" id="editEndDate" required>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditProjectModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
         

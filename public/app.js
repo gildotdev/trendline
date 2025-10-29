@@ -118,6 +118,7 @@ async function handleCreateProject(e) {
     e.preventDefault();
     
     const projectId = document.getElementById('projectId').value.trim();
+    const projectName = document.getElementById('projectName').value.trim();
     const totalTasks = parseInt(document.getElementById('totalTasks').value);
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
@@ -129,6 +130,7 @@ async function handleCreateProject(e) {
     
     const projectData = {
         projectId,
+        projectName,
         totalTasks,
         startDate,
         endDate,
@@ -267,7 +269,8 @@ function loadProject(project) {
     currentProject = project;
     showTrackerView();
     
-    document.getElementById('projectTitle').textContent = project.projectId;
+    // Display project name if available, otherwise fall back to projectId
+    document.getElementById('projectTitle').textContent = project.projectName || project.projectId;
     
     // Calculate statistics
     const totalCompleted = Object.values(project.dailyProgress || {}).reduce((sum, val) => sum + val, 0);
@@ -536,4 +539,89 @@ function editProgress(date, currentValue) {
     document.getElementById('progressDate').value = date;
     document.getElementById('tasksCompleted').value = currentValue;
     document.getElementById('tasksCompleted').focus();
+}
+
+// Show edit project modal
+function showEditProjectModal() {
+    if (!currentProject) return;
+    
+    document.getElementById('editProjectName').value = currentProject.projectName || currentProject.projectId;
+    document.getElementById('editStartDate').value = currentProject.startDate;
+    document.getElementById('editEndDate').value = currentProject.endDate;
+    
+    document.getElementById('editProjectModal').classList.remove('hidden');
+}
+
+// Close edit project modal
+function closeEditProjectModal() {
+    document.getElementById('editProjectModal').classList.add('hidden');
+}
+
+// Handle edit project form submission
+document.addEventListener('DOMContentLoaded', () => {
+    // Existing event listeners...
+    document.getElementById('editProjectForm').addEventListener('submit', handleEditProject);
+    
+    // Close modal when clicking outside of it
+    document.getElementById('editProjectModal').addEventListener('click', (e) => {
+        if (e.target.id === 'editProjectModal') {
+            closeEditProjectModal();
+        }
+    });
+});
+
+// Update project information
+async function handleEditProject(e) {
+    e.preventDefault();
+    
+    if (!currentProject) return;
+    
+    const projectName = document.getElementById('editProjectName').value.trim();
+    const startDate = document.getElementById('editStartDate').value;
+    const endDate = document.getElementById('editEndDate').value;
+    
+    if (new Date(startDate) >= new Date(endDate)) {
+        showMessage('End date must be after start date', 'error');
+        return;
+    }
+    
+    // Validate that existing progress dates are still within the new date range
+    const progressDates = Object.keys(currentProject.dailyProgress || {});
+    const hasInvalidDates = progressDates.some(date => date < startDate || date > endDate);
+    
+    if (hasInvalidDates) {
+        if (!confirm('Some existing progress entries fall outside the new date range. These entries will be kept but may affect chart accuracy. Continue?')) {
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch('/api/project', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                projectId: currentProject.projectId,
+                projectName,
+                startDate,
+                endDate
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update project');
+        }
+        
+        // Update local data
+        currentProject.projectName = projectName;
+        currentProject.startDate = startDate;
+        currentProject.endDate = endDate;
+        
+        closeEditProjectModal();
+        showMessage('Project updated successfully!', 'success');
+        
+        // Reload the display with updated data
+        loadProject(currentProject);
+    } catch (error) {
+        showMessage('Error updating project: ' + error.message, 'error');
+    }
 }
