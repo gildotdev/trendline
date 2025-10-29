@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+      - develop
+      - 'feature/**'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -21,9 +27,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages (Production)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy public --project-name=trendline
+
+      - name: Deploy to Cloudflare Pages (Preview)
+        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=trendline --branch=${{ github.head_ref || github.ref_name }}
